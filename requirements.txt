@@ -1,2 +1,2 @@
-gym
+learnrl >= 0.2.2
 tensorflow >= 2.1.0
