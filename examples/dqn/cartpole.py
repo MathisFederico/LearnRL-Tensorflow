@@ -13,7 +13,7 @@ action_value = keras.models.Sequential(
     ]
 )
 
-control = rltf.control.Greedy(env.action_space, .1)
+control = rltf.control.Greedy()
 evaluation = rltf.evaluation.QLearning()
 memory = rltf.memory.Memory()
 

@@ -53,6 +53,8 @@ class DQAgent(rl.Agent):
                 zip(grads, self.action_value.trainable_weights)
             )
 
+        self.control.update_exploration()
+
         metrics = {
             "loss": loss.numpy(),
             "exploration": self.control.exploration,
