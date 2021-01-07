@@ -7,12 +7,13 @@ class DQAgent(rl.Agent):
         self,
         observation_space,
         action_space,
+        action_value: tf.keras.Model = None,
         control=None,
         evaluation=None,
-        action_value: tf.keras.Model = None,
         memory=None,
         sample_size=32,
         learning_rate=1e-3,
+        freezed_steps=0,
     ):
         self.control = control
         self.evaluation = evaluation
@@ -21,9 +22,19 @@ class DQAgent(rl.Agent):
         self.memory = memory
         self.sample_size = sample_size
 
+        self.freezed_steps = freezed_steps
+        if self.freezed_steps > 0:
+            self.freezed_steps_left = self.freezed_steps
+            self.action_value_freezed = tf.keras.models.clone_model(self.action_value)
+
     def act(self, observation, greedy=False):
         observations = tf.expand_dims(observation, axis=0)
-        Q = self.action_value(observations)
+
+        if self.freezed_steps == 0:
+            Q = self.action_value(observations, training=False)
+        else:
+            Q = self.action_value_freezed(observations, training=False)
+
         action = self.control(Q, greedy)[0]
         return action.numpy()
 
@@ -52,6 +63,12 @@ class DQAgent(rl.Agent):
             self.action_value_opt.apply_gradients(
                 zip(grads, self.action_value.trainable_weights)
             )
+
+        if self.freezed_steps > 0:
+            if self.freezed_steps_left == 0:
+                self.action_value_freezed.set_weights(self.action_value.get_weights())
+                self.freezed_steps_left = self.freezed_steps
+            self.freezed_steps_left -= 1
 
         self.control.update_exploration()
 

@@ -17,9 +17,8 @@ control = rltf.control.Greedy()
 evaluation = rltf.evaluation.QLearning()
 memory = rltf.memory.Memory()
 
-agent = rltf.agents.Q.DQAgent(env.observation_space, env.action_space, control, evaluation, action_value, memory)
+agent = rltf.agents.Q.DQAgent(env.observation_space, env.action_space, action_value, control, evaluation, memory, freezed_steps=100)
 
 playground = rl.Playground(env, agent)
 playground.fit(500, verbose=2)
 playground.test(10)
-
